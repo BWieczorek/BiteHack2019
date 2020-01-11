@@ -8,6 +8,9 @@ decision_counter = 0
 left_turn = 0
 right_turn = 0
 forward = 0
+
+serial_device = df.UART_init()
+
 while True:
     _, frame = cap.read()
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
@@ -37,11 +40,11 @@ while True:
     if decision_counter >= 25:
         decision_counter = 0
         if left_turn > forward and left_turn > right_turn:
-            print("Turn left")
+            df.UART_print(serial_device, "Turn left") #change to df.UART_send_msg
         elif forward >= left_turn and forward >= right_turn:
-            print("Go forward")
+            df.UART_print(serial_device, "Go Forward") #change to df.UART_send_msg
         elif right_turn > forward and right_turn > left_turn:
-            print("Turn right")
+            df.UART_print(serial_device, "Turn right")#change to df.UART_send_msg
         left_turn = 0
         forward = 0
         right_turn = 0
