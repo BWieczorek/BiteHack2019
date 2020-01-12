@@ -1,7 +1,14 @@
 import cv2
 import numpy as np
 import detection_fun as df
+import RPi.GPIO as GPIO
 
+
+GPIO.setmode(GPIO.BOARD)
+GPIO.setup(16, GPIO.OUT)
+GPIO.setup(18, GPIO.OUT)
+GPIO.output(16, GPIO.LOW)
+GPIO.output(18, GPIO.LOW)
 cap = cv2.VideoCapture(0)
 
 decision_counter = 0
@@ -31,23 +38,19 @@ while True:
             frame = cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 10)
             frame = cv2.circle(frame, radius=5, center=(int(x+w/2), int(y+h/2)), color=(0, 0, 255), thickness=3)
             if x+w/2 <= 150:
-                left_turn += 1
+                GPIO.output(16, GPIO.LOW)
+                GPIO.output(18, GPIO.HIGH)
             elif 150 < x+w/2 <= 490:
-                forward += 1
+                GPIO.output(16, GPIO.HIGH)
+                GPIO.output(18, GPIO.HIGH)
             else:
-                right_turn += 1
-            decision_counter += 1
-    if decision_counter >= 25:
-        decision_counter = 0
-        if left_turn > forward and left_turn > right_turn:
-            df.UART_print(serial_device, "Turn left") #change to df.UART_send_msg
-        elif forward >= left_turn and forward >= right_turn:
-            df.UART_print(serial_device, "Go Forward") #change to df.UART_send_msg
-        elif right_turn > forward and right_turn > left_turn:
-            df.UART_print(serial_device, "Turn right")#change to df.UART_send_msg
-        left_turn = 0
-        forward = 0
-        right_turn = 0
+                GPIO.output(16, GPIO.HIGH)
+                GPIO.output(18, GPIO.LOW)
+    else:
+        GPIO.output(16, GPIO.LOW)
+        GPIO.output(18, GPIO.LOW)
+
+
 
     frame = cv2.line(frame, (150, 0), (150, 480), color=(0, 0, 255), thickness=2)
     frame = cv2.line(frame, (490, 0), (490, 480), color=(0, 0, 255), thickness=2)
